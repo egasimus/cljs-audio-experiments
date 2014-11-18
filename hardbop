@@ -1,0 +1,33 @@
+#!/usr/bin/node
+
+(function () {
+  
+  console.log('Starting Hardbop.');
+
+  var path = require('path'),
+      goog = require('./libs/out/goog.js');
+
+  // Determine session path.
+  var session_path = process.argv[2] ? path.resolve(process.argv[2]): '';
+
+  if (session_path) {
+
+    console.log('Loading session: ' + session_path);
+
+    // Load ClojureScript compiler.
+    require('./libs/nodecljs.js');
+    goog.require('nodecljs');
+
+    // Run compiler on session code.
+    var main_cli_fn = cljs.core._STAR_main_cli_fn_STAR_
+    if (main_cli_fn) cljs.core.apply.call(
+      null, main_cli_fn, [session_path])
+
+  } else {
+
+    console.log('Starting new session.');
+
+  }
+
+
+})()
