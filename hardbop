@@ -1,11 +1,16 @@
 #!/usr/bin/node
+// vi:syntax=javascript
+
+/*
+ * Session launcher.
+ */
 
 (function () {
   
   console.log('Starting Hardbop.');
 
   var path = require('path'),
-      goog = require('./libs/out/goog.js');
+      goog = require('./libs/goog.js');
 
   // Determine session path.
   var session_path = process.argv[2] ? path.resolve(process.argv[2]): '';
@@ -15,7 +20,7 @@
     console.log('Loading session: ' + session_path);
 
     // Load ClojureScript compiler.
-    require('./libs/nodecljs.js');
+    require('./libs/namespaces.js');
     goog.require('nodecljs');
 
     // Run compiler on session code.
@@ -28,6 +33,5 @@
     console.log('Starting new session.');
 
   }
-
 
 })()
