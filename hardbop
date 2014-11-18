@@ -21,7 +21,9 @@
 
     // Load ClojureScript compiler.
     require('./libs/namespaces.js');
+    require('./src/namespaces.js');
     goog.require('nodecljs');
+    goog.require('hardbop');
 
     // Run compiler on session code.
     var main_cli_fn = cljs.core._STAR_main_cli_fn_STAR_
