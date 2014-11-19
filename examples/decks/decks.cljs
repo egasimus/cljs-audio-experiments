@@ -1,9 +1,6 @@
 (ns examples.decks
-  (:require [hardbop]))
-
-(defn track [& args])
-
-(defn clip [& args])
+  (:require [cljs.repl :as repl]
+            [hardbop :refer [track clip]]))
 
 (def info
   { :title  "Example I"

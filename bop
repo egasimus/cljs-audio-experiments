@@ -1,0 +1,64 @@
+#!/usr/bin/node
+// vi:syntax=javascript
+
+/*
+ *
+ * HARDBOP. Session launcher.
+ *
+ * Runs the initial compilation of hardbop and the session,
+ * bootstrapping into ClojureScript code as fast as it can.
+ *
+ */
+
+(function () {
+  
+  console.log('Starting Hardbop.');
+
+  var fs   = require('fs'),
+      path = require('path'),
+      goog = require('./libs/goog.js');
+
+  // Load ClojureScript compiler
+  require('./libs/namespaces.js');
+  goog.require('nodecljs');
+
+  // Set a `*print-fn*` for the compiler
+  var out = function (arg) { process.stdout.write(arg) };
+  cljs.core._STAR_out_STAR_ = cljs.core._STAR_rtn_STAR_ =
+  cljs.core._STAR_err_STAR_ = cljs.core._STAR_print_fn_STAR_ = out;
+
+  // Compile Hardbop
+  var src = fs.readFileSync('./hardbop/hardbop.cljs').toString(),
+      bop = cljs.repl.eval_print(src);
+
+  // Tell Hardbop where the session is
+  cljs.core._STAR_session_path_STAR_ =
+    process.argv[2] ? path.resolve(process.argv[2]): '';
+
+  // Now this part I'm admittedly scared of. Mommy? Apparently
+  // you need to pass null as a first argument to everything,
+  // though I still haven't found out why exactly. I guess it
+  // corresponds to:
+  //   (apply (*main-cli-fn* (drop 3 (.argv js/process))))
+  // Note that *main-cli-fn* has been set to a new value by
+  // evaluating `hardbop.cljs`, which contains this code:
+  //   (set! *main-cli-fn* -main)
+  // which sets a new main function: `-main` from `hardbop.cljs`.
+  cljs.core.apply.call(null,cljs.core._STAR_main_cli_fn_STAR_,
+                       cljs.core.drop.call(null,3,process.argv));
+
+/*
+  debugger;
+
+  if (session_path) {
+
+    console.log('Loading session: ' + session_path);
+
+  } else {
+
+    console.log('Starting new session.');
+
+  }
+*/
+
+})()
