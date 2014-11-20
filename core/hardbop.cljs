@@ -45,11 +45,12 @@
 (defn eval-session-1
   [form]
   (let [head (first form)
-        tail (rest form)]
-    (case head
+        tail (rest  form)]
+    (condp = head
       'metadata (let [info (make-map tail)]
                   (println "\nauthor ::" (info :author)
                            "\n title ::" (info :title)))
+      'use      (println " using ::" (apply str tail))
       nil)))
 
 
@@ -91,7 +92,7 @@
                  (.prompt rl)))
 
     (.on rl "close"
-      (fn [] (println (str "\n" (centered GOODBYE)))
+      (fn [] (println (str "<EXIT>\n" (centered GOODBYE)))
              (if-let [session (nth (.-argv js/process) 2)]
                (.resolve (js/require "path") session)
                "untitled")

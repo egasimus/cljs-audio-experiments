@@ -27,7 +27,7 @@
   cljs.core._STAR_err_STAR_ = cljs.core._STAR_print_fn_STAR_ = out;
 
   // ODIN!  Compile Hardbop REPL
-  var src = fs.readFileSync('./hardbop/repl.cljs').toString(),
+  var src = fs.readFileSync('./core/hardbop.cljs').toString(),
       bop = cljs.repl.evaluate_code(src);
 
   // Okay now this part I'm admittedly still scared of. Mommy?
