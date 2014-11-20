@@ -1,5 +1,6 @@
 (ns hardbop.repl
-  (:require [cljs.repl :as repl]))
+  (:require [cljs.reader :as reader]
+            [cljs.repl   :as repl]))
 
 
 (def HELLO   "!bopbop boq doqdoq¡")
@@ -13,10 +14,24 @@
                       (.resolve (js/require "path") session)
                       "untitled"))
 
-(defn evaluate [path]
-  (let [fs (js/require "fs")
-        text (.toString (.readFileSync fs *bop-session*))]
-    (repl/eval-print text)))
+
+(defn session [info & body]
+  (println "Look, a session!")
+  (println info)
+  (println body))
+
+
+(defn read-file [path]
+  (let [fs (js/require "fs")]
+    (.toString (.readFileSync fs *bop-session*))))
+
+
+(defn read-cljs [path]
+  (reader/read-string (read-file path)))
+
+
+(defn evaluate-cljs [path]
+  (repl/evaluate-code (read-file path)))
 
 
 (defn run-repl []
@@ -48,15 +63,16 @@
   (set! *print-fn* #(*out* %))
  
   ;; evaluate the session contents 
-  (evaluate *bop-session*)
+  (read-cljs *bop-session*)
 
   ;; oh my, where are our manners?
-  (println (str "\n\n" HELLO "\n"))
+  (println (str "\n" HELLO "\n"))
   (println "*bop-cwd*     " *bop-cwd*)
   (println "*bop-session* " *bop-session*)
   (println)
 
   ;; setup readline interface to repl
   (run-repl))
-  
+
+
 (set! *main-cli-fn* -main)

@@ -1,21 +1,32 @@
-(ns examples.decks
-  (:require [cljs.repl :as repl]))
+(session
+  { :info   { :title  "Decks"
+              :author "Mlad Konstruktor <fallenblood@gmail.com>" }
+    :import [ "hardbop.tracks" ]
 
-(defn track [& args])
+    :tracks [ [ "Deck A", [] ]
+              [ "Deck B", [] ] ] }
+  (let [foo "bar"]
+    (println "foo" foo))
+  (track "lol"))
 
-(defn clip [& args])
+;(ns examples.decks
+  ;(:require [cljs.repl :as repl]))
 
-(def info
-  { :title  "Example I"
-    :author "Mlad Konstruktor <fallenblood@gmail.com>" })
+;(defn track [& args])
 
-(def tracks
-  [ (track "Deck A"
-      (clip "Dat Beat"   "/home/epimetheus/hear/samples/favorites/drums/140bpm-vec3-breakbeat-011.wav")
-      (clip "Same Beat"  "/home/epimetheus/hear/samples/favorites/drums/140bpm-vec3-breakbeat-011.wav"))
+;(defn clip [& args])
 
-    (track "Deck B"
-      (clip "Nasty Bass" "/home/epimetheus/hear/samples/favorites/bass/140bpm-g-vdub2-melody-100.wav")
-      (clip "Nice Bass"  "/home/epimetheus/hear/samples/favorites/bass/128bpm-em-vdub2-melody-47.wav")) ])
+;(def info
+  ;{ :title  "Example I"
+    ;:author "Mlad Konstruktor <fallenblood@gmail.com>" })
 
-(println tracks)
+;(def tracks
+  ;[ (track "Deck A"
+      ;(clip "Dat Beat"   "/home/epimetheus/hear/samples/favorites/drums/140bpm-vec3-breakbeat-011.wav")
+      ;(clip "Same Beat"  "/home/epimetheus/hear/samples/favorites/drums/140bpm-vec3-breakbeat-011.wav"))
+
+    ;(track "Deck B"
+      ;(clip "Nasty Bass" "/home/epimetheus/hear/samples/favorites/bass/140bpm-g-vdub2-melody-100.wav")
+      ;(clip "Nice Bass"  "/home/epimetheus/hear/samples/favorites/bass/128bpm-em-vdub2-melody-47.wav")) ])
+
+;(println tracks)

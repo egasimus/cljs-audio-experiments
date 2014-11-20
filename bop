@@ -12,10 +12,7 @@
 
 (function () {
 
-  // Begin startup sequence  
-  console.log('Starting Hardbop.');
-
-  // Engage required dependencies
+  // Engage launch sequence 
   var fs   = require('fs'),
       path = require('path'),
       goog = require('./libs/goog.js');
@@ -31,7 +28,7 @@
 
   // ODIN!  Compile Hardbop REPL
   var src = fs.readFileSync('./hardbop/repl.cljs').toString(),
-      bop = cljs.repl.eval_print(src);
+      bop = cljs.repl.evaluate_code(src);
 
   // Okay now this part I'm admittedly still scared of. Mommy?
   // Apparently you need to pass null as a first argument to
