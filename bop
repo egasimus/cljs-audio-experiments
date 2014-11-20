@@ -29,8 +29,8 @@
   cljs.core._STAR_out_STAR_ = cljs.core._STAR_rtn_STAR_ =
   cljs.core._STAR_err_STAR_ = cljs.core._STAR_print_fn_STAR_ = out;
 
-  // ODIN!  Compile Hardbop
-  var src = fs.readFileSync('./hardbop/hardbop.cljs').toString(),
+  // ODIN!  Compile Hardbop REPL
+  var src = fs.readFileSync('./hardbop/repl.cljs').toString(),
       bop = cljs.repl.eval_print(src);
 
   // Okay now this part I'm admittedly still scared of. Mommy?
@@ -44,7 +44,7 @@
   // which sets a new main function: `-main` from `hardbop.cljs`.
   // Thus, by running `*main-cli-fn*` we effectively hand over
   // control to Hardbop. PUSK! 
-  cljs.core.apply.call(null,cljs.core._STAR_main_cli_fn_STAR_,
-                       cljs.core.drop.call(null,3,process.argv));
+  cljs.core.apply.call(null, cljs.core._STAR_main_cli_fn_STAR_,
+                       cljs.core.drop.call(null, 3, process.argv));
 
 })()

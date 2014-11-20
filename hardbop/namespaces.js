@@ -1,2 +1,2 @@
-goog.addDependency("../../hardbop/hardbop.js",  ["hardbop"], []);
-goog.addDependency("../../hardbop/controls.js", ["hardbop.controls"], []);
+goog.addDependency("../../hardbop/repl.cljs",     ["hardbop.repl"], []);
+goog.addDependency("../../hardbop/controls.cljs", ["hardbop.controls"], []);

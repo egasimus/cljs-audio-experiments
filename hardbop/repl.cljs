@@ -1,12 +1,10 @@
-(ns hardbop.core
+(ns hardbop.repl
   (:require [cljs.repl :as repl]))
-
-(def *js-path*      (js/require "path"))
 
 (def *bop-cwd*      (.cwd js/process))
 
 (def *bop-session*  (if-let [session (nth (.-argv js/process) 2)]
-                      (.resolve *js-path* session)
+                      (.resolve (js/require "path") session)
                       "untitled"))
 
 (defn pep [text]
@@ -24,10 +22,17 @@
   (set! *rtn* #(.write (.-stdout js/process) %))
   (set! *err* #(.write (.-stderr js/process) %))
   (set! *print-fn* #(*out* %))
+ 
+  ;; evaluate the session contents 
+  (let [fs (js/require "fs")
+        text (.toString (.readFileSync fs *bop-session*))]
+    (repl/eval-print text))
 
-  ;; where are our manners?
-  (println "\nbopbop boq doqdoq")
-  (println *bop-session*)
+  ;; oh my, where are our manners?
+  (println "\n\nbopbop boq doqdoq!\n")
+  (println "*bop-cwd*     " *bop-cwd*)
+  (println "*bop-session* " *bop-session*)
+  (println)
 
   ;; setup readline interface to repl
   (let [readline (js/require "readline")
@@ -42,7 +47,7 @@
                      (.prompt rl)))
 
     (.on rl "close" (fn []
-      (println "\nqodqoq pod bopbop")
+      (println "\n\nqodqoq pod bopbop?")
       (.exit js/process 0)))))
   
 (set! *main-cli-fn* -main)
