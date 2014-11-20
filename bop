@@ -31,10 +31,12 @@
       bop = cljs.repl.evaluate_code(src);
 
   // Okay now this part I'm admittedly still scared of. Mommy?
+  //
   // Apparently you need to pass null as a first argument to
   // everything, though I still haven't found out why exactly.
   // I guess the below code corresponds to:
   //   (apply (*main-cli-fn* (drop 3 (.argv js/process))))
+  //
   // Note that `*main-cli-fn*` has been set to a new value by
   // evaluating `hardbop.cljs`, which contains this code:
   //   (set! *main-cli-fn* -main)

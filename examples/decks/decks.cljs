@@ -1,13 +1,23 @@
-(session
-  { :info   { :title  "Decks"
-              :author "Mlad Konstruktor <fallenblood@gmail.com>" }
-    :import [ "hardbop.tracks" ]
+(metadata { :title  "Four sampling tracks."
+            :author "Mlad Konstruktor <fallenblood@gmail.com>" })
 
-    :tracks [ [ "Deck A", [] ]
-              [ "Deck B", [] ] ] }
-  (let [foo "bar"]
-    (println "foo" foo))
-  (track "lol"))
+
+(use sooperlooper)
+
+
+(track "Deck A"
+  (clip "empty clip")
+  (clip "empty clip")
+  (clip "empty clip")
+  (clip "empty clip"))
+
+
+(track "Deck B"
+  (clip "empty clip")
+  (clip "empty clip")
+  (clip "empty clip")
+  (clip "empty clip"))
+
 
 ;(ns examples.decks
   ;(:require [cljs.repl :as repl]))
