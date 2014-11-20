@@ -11,7 +11,7 @@
 (def GOODBYE "?qodqoq pod bopbop¿")
 
 
-; session
+; read
  
 
 (defn read-file
@@ -36,13 +36,36 @@
       [])))
 
 
+; evaluate
+
+
 (defn make-map
   [coll]
   (zipmap (take-nth 2 coll)
           (take-nth 2 (rest coll))))
 
 
-(defn eval-session-1
+(defn resolve-module
+  [module]
+  (let [path (js/require "path")
+        fs   (js/require "fs")
+
+        module-path (.resolve path (.join path
+          "contrib" (str module ".cljs")))]
+
+    (if (.existsSync fs module-path)
+      module-path
+      nil)))
+
+
+(defn use-module
+  [module]
+  (if-let [module-path (resolve-module module)]
+    (do (println "loading module" module "from" module-path)
+        (println (read-cljs module-path)))
+    nil))
+
+(defn eval-module-1
   [form]
   (let [head (first form)
         tail (rest  form)]
@@ -50,22 +73,23 @@
       'metadata (let [info (make-map tail)]
                   (println "\nauthor ::" (info :author)
                            "\n title ::" (info :title)))
-      'use      (println " using ::" (apply str tail))
+      'use      (do (println " using ::" (apply str tail))
+                    (doseq [module tail] (use-module module)))
       nil)))
 
 
-(defn eval-session
-  [session]
-  (doseq [form session]
-    (eval-session-1 form)))
+(defn eval-module
+  [module]
+  (doseq [form module]
+    (eval-module-1 form)))
 
 
-; repl
-
-
-(defn eval-cljs
+(defn eval-file
   [path]
   (repl/evaluate-code (read-file path)))
+
+
+; print
 
 
 (defn centered
@@ -93,9 +117,6 @@
 
     (.on rl "close"
       (fn [] (println (str "<EXIT>\n" (centered GOODBYE)))
-             (if-let [session (nth (.-argv js/process) 2)]
-               (.resolve (js/require "path") session)
-               "untitled")
              (.exit js/process 0)))))
 
 
@@ -133,7 +154,7 @@
   (println "*bop*" *bop*)
 
   ;; evaluate session contents
-  (eval-session (*bop* :session))
+  (eval-module (*bop* :session))
 
   ;; setup readline interface to repl
   (println)

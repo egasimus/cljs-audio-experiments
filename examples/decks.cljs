@@ -3,21 +3,21 @@
   :author "Mlad Konstruktor <fallenblood@gmail.com>")
 
 
-(use sooperlooper)
+(use osc)
 
 
-(track "Deck A"
-  (clip "empty clip")
-  (clip "empty clip")
-  (clip "empty clip")
-  (clip "empty clip"))
+;(track "Deck A"
+  ;(clip "empty clip")
+  ;(clip "empty clip")
+  ;(clip "empty clip")
+  ;(clip "empty clip"))
 
 
-(track "Deck B"
-  (clip "empty clip")
-  (clip "empty clip")
-  (clip "empty clip")
-  (clip "empty clip"))
+;(track "Deck B"
+  ;(clip "empty clip")
+  ;(clip "empty clip")
+  ;(clip "empty clip")
+  ;(clip "empty clip"))
 
 
 ;(ns examples.decks

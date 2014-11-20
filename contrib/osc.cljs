@@ -1,6 +1,1 @@
-(ns hardbop.controls)
-
-(defn track [& args])
-
-(defn clip [& args])
-
+(ns osc)
