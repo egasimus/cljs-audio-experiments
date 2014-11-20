@@ -1,5 +1,6 @@
-(metadata { :title  "Four sampling tracks."
-            :author "Mlad Konstruktor <fallenblood@gmail.com>" })
+(metadata 
+  :title  "Four sampling tracks."
+  :author "Mlad Konstruktor <fallenblood@gmail.com>")
 
 
 (use sooperlooper)

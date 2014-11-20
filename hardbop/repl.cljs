@@ -11,7 +11,7 @@
 (def GOODBYE "?qodqoq pod bopbop¿")
 
 
-; reader
+; session
  
 
 (defn read-file
@@ -36,12 +36,44 @@
       [])))
 
 
+(defn make-map
+  [coll]
+  (zipmap (take-nth 2 coll)
+          (take-nth 2 (rest coll))))
+
+
+(defn eval-session-1
+  [form]
+  (let [head (first form)
+        tail (rest form)]
+    (case head
+      'metadata (let [info (make-map tail)]
+                  (println "\nauthor ::" (info :author)
+                           "\n title ::" (info :title)))
+      nil)))
+
+
+(defn eval-session
+  [session]
+  (doseq [form session]
+    (eval-session-1 form)))
+
+
 ; repl
 
 
-(defn evaluate-cljs
+(defn eval-cljs
   [path]
   (repl/evaluate-code (read-file path)))
+
+
+(defn centered
+  ([string] (centered string (.-columns (.-stdout js/process))))
+  ([string width]
+    (let [round   #((.-round js/Math) %)
+          padding (round (/ (- width (count string)) 2))
+          pad     (apply str (repeat padding " "))]
+      (str pad string pad))))
 
 
 (defn run-repl
@@ -59,7 +91,10 @@
                  (.prompt rl)))
 
     (.on rl "close"
-      (fn [] (println (str "\n\n" GOODBYE))
+      (fn [] (println (str "\n" (centered GOODBYE)))
+             (if-let [session (nth (.-argv js/process) 2)]
+               (.resolve (js/require "path") session)
+               "untitled")
              (.exit js/process 0)))))
 
 
@@ -69,6 +104,7 @@
 (let [session-path (if-let [session (nth (.-argv js/process) 2)]
                              (.resolve (js/require "path") session)
                              "untitled")]
+
   (def *bop* { :cwd          (.cwd js/process)
                :session-path session-path
                :session      (read-cljs session-path) }))
@@ -84,14 +120,20 @@
   (repl/init)
 
   ;; setup print functions
-  (set! *out* #(.write (.-stdout js/process) %))
-  (set! *rtn* #(.write (.-stdout js/process) %))
-  (set! *err* #(.write (.-stderr js/process) %))
-  (set! *print-fn* #(*out* %))
+  (let [stdout #(.write (.-stdout js/process) %)
+        stderr #(.write (.-stderr js/process) %)]
+    (set! *err* stderr)
+    (set! *out* stdout)
+    (set! *rtn* stdout)
+    (set! *print-fn* stdout))
 
   ;; oh my, where are our manners?
-  (println (str "\n" HELLO "\n"))
-  (println "*bop*" *bop* "\n")
+  (println (str (centered HELLO) "\n"))
+  (println "*bop*" *bop*)
+
+  ;; evaluate session contents
+  (eval-session (*bop* :session))
 
   ;; setup readline interface to repl
+  (println)
   (run-repl)))
