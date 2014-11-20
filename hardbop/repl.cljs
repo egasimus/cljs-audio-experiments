@@ -63,16 +63,15 @@
              (.exit js/process 0)))))
 
 
-; globals (yuck!)
+; global state
 
 
-(def *bop-cwd*          (.cwd js/process))
-
-(def *bop-session-path* (if-let [session (nth (.-argv js/process) 2)]
-                          (.resolve (js/require "path") session)
-                          "untitled"))
-
-(def *bop-session*      (read-cljs *bop-session-path*))
+(let [session-path (if-let [session (nth (.-argv js/process) 2)]
+                             (.resolve (js/require "path") session)
+                             "untitled")]
+  (def *bop* { :cwd          (.cwd js/process)
+               :session-path session-path
+               :session      (read-cljs session-path) }))
 
 
 ; startup
@@ -92,10 +91,7 @@
 
   ;; oh my, where are our manners?
   (println (str "\n" HELLO "\n"))
-  (println "*bop-cwd*          " *bop-cwd*)
-  (println "*bop-session-path* " *bop-session-path*)
-  (println "*bop-session*      " *bop-session*)
-  (println)
+  (println "*bop*" *bop* "\n")
 
   ;; setup readline interface to repl
   (run-repl)))
