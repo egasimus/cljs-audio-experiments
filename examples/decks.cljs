@@ -3,7 +3,7 @@
   :author "Mlad Konstruktor <fallenblood@gmail.com>")
 
 
-(use osc)
+(use osc midi)
 
 
 ;(track "Deck A"

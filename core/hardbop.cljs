@@ -181,7 +181,6 @@
 
   ;; oh my, where are our manners?
   (println (str (centered HELLO) "\n"))
-  (println "*bop*" *bop*)
 
   ;; evaluate session contents
   (eval-module (@(*bop* :session) :body))

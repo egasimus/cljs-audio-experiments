@@ -5,5 +5,3 @@
     (fn [msg rinfo]
       (trigger :osc-msg { :msg  msg
                           :info rinfo })) ))
-
-(println *bop*)
