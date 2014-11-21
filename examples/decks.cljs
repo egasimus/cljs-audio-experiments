@@ -9,47 +9,49 @@
 (use-module "midi")
 
 
+(def timers (js/require "timers"))
+
+
 (on :midi-in (fn [args] (println args)))
 
 
 (on :osc-in  (fn [args] (println args)))
 
 
-(trigger :midi-out 176 0 127)
+(trigger :midi-out 176 0 0)
+(trigger :midi-out 176 0 1)
 
 
-;(track "Deck A"
-  ;(clip "empty clip")
-  ;(clip "empty clip")
-  ;(clip "empty clip")
-  ;(clip "empty clip"))
+(defn looper-1
+  [pos]
+  (let [next-pos (cond (< pos 0)  0
+                       (= pos 7)  16
+                       (> pos 22) 0
+                       :else      (+ 1 pos))]
+    (doseq [i [0  1  2  3  4  5  6  7
+               16 17 18 19 20 21 22 23]]
+      (trigger :midi-out 144 i 0))
+    (trigger :midi-out 144 pos 15)
+    next-pos))
 
 
-;(track "Deck B"
-  ;(clip "empty clip")
-  ;(clip "empty clip")
-  ;(clip "empty clip")
-  ;(clip "empty clip"))
+(defn looper
+  []
+  (let [position (atom 0)]
+
+    (on :beat
+      (fn [args]
+        (swap! position looper-1)))
+
+    (on :midi-in
+      (fn [args]
+        (let [msg  (nth (nth args 0) 1)
+              step (nth msg 1)
+              vel  (nth msg 2)]
+          (when (= vel 127) (reset! position (looper-1 step))) ))) ))
 
 
-;(ns examples.decks
-  ;(:require [cljs.repl :as repl]))
+(on :beat (fn [args] (.setTimeout timers #(trigger :beat) 100)))
 
-;(defn track [& args])
 
-;(defn clip [& args])
-
-;(def info
-  ;{ :title  "Example I"
-    ;:author "Mlad Konstruktor <fallenblood@gmail.com>" })
-
-;(def tracks
-  ;[ (track "Deck A"
-      ;(clip "Dat Beat"   "/home/epimetheus/hear/samples/favorites/drums/140bpm-vec3-breakbeat-011.wav")
-      ;(clip "Same Beat"  "/home/epimetheus/hear/samples/favorites/drums/140bpm-vec3-breakbeat-011.wav"))
-
-    ;(track "Deck B"
-      ;(clip "Nasty Bass" "/home/epimetheus/hear/samples/favorites/bass/140bpm-g-vdub2-melody-100.wav")
-      ;(clip "Nice Bass"  "/home/epimetheus/hear/samples/favorites/bass/128bpm-em-vdub2-melody-47.wav")) ])
-
-;(println tracks)
+(looper)
