@@ -58,6 +58,11 @@
       nil)))
 
 
+(defn eval-file
+  [path]
+  (repl/evaluate-code (get-file-contents path)))
+
+
 (defn use-module
   [module-name]
   (if-let [module-path (resolve-module module-name)]
@@ -70,29 +75,6 @@
           (swap! (*bop* :session) assoc :deps new-deps)A
           (eval-file module-path)))
     nil))
-
-
-(defn eval-module-1
-  [f]
-  (let [head (first f)
-        tail (rest  f)]
-    (condp = head
-      'use      (do (println " using ::" (apply str tail))
-                    (doseq [module tail] (use-module module)))
-      'metadata (let [info (make-map tail)]
-                  (println "\nauthor ::" (info :author)
-                           "\n title ::" (info :title)))
-      nil)))
-
-
-(defn eval-module
-  [forms]
-  (doseq [f forms] (eval-module-1 f)))
-
-
-(defn eval-file
-  [path]
-  (repl/evaluate-code (get-file-contents path)))
 
 
 ; print
@@ -118,7 +100,7 @@
       (fn [line] (when (seq (filter #(not= " " %) line))
                    (repl/eval-print line)
                    (println))
-                 (.setPrompt rl (repl/prompt))gt
+                 (.setPrompt rl (repl/prompt))
                  (.prompt rl)))
 
     (.on rl "close"
@@ -142,7 +124,7 @@
   ([event params]
     (let [event-hooks (@(*bop* :events) event)]
       (doseq [hook event-hooks]
-        (hook paramse))) ))
+        (hook params))) ))
 
 
 ; some ridiculous amount of global state is pushed onto here...
@@ -183,7 +165,7 @@
   (println (str (centered HELLO) "\n"))
 
   ;; evaluate session contents
-  (eval-module (@(*bop* :session) :body))
+  (eval-file (@(*bop* :session) :path))
 
   ;; setup readline interface to repl
   (println)

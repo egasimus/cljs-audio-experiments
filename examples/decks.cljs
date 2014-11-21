@@ -1,9 +1,18 @@
-(metadata 
-  :title  "Four sampling tracks."
-  :author "Mlad Konstruktor <fallenblood@gmail.com>")
+;(metadata 
+  ;:title  "Four sampling tracks."
+  ;:author "Mlad Konstruktor <fallenblood@gmail.com>")
 
 
-(use osc midi)
+(use-module "osc")
+
+
+(use-module "midi")
+
+
+(on :midi-msg (fn [args] (println args)))
+
+
+(on :osc-msg  (fn [args] (println args)))
 
 
 ;(track "Deck A"

@@ -4,4 +4,4 @@
   (.openPort input 1)
   (.on input "message"
     (fn [delta-time message]
-      (println delta-time message))))
+      (trigger :midi-msg [delta-time message])) ))
