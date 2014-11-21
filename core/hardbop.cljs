@@ -14,25 +14,25 @@
 ; read
  
 
-(defn read-file
+(defn get-file-contents
   [path]
   (let [fs (js/require "fs")]
     (.toString (.readFileSync fs path))))
 
 
-(defn read-cljs-1
+(defn read-file-1
   [reader forms]
   (if-let [form (reader/read reader false nil)]
-    (read-cljs-1 reader (conj forms form))
+    (read-file-1 reader (conj forms form))
     forms))
 
 
-(defn read-cljs
+(defn read-file
   [path]
-  (let [reader (reader/string-push-back-reader (read-file path))
+  (let [reader (reader/string-push-back-reader (get-file-contents path))
         form   (reader/read reader false nil)]
     (if (not (nil? form))
-      (read-cljs-1 reader [form])
+      (read-file-1 reader [form])
       [])))
 
 
@@ -59,22 +59,30 @@
 
 
 (defn use-module
-  [module]
-  (if-let [module-path (resolve-module module)]
-    (do (println "loading module" module "from" module-path)
-        (println (read-cljs module-path)))
+  [module-name]
+  (if-let [module-path (resolve-module module-name)]
+    (do (println "loading module" module-name "from" module-path)
+        (let [session  @(*bop* :session)
+              module   { :name module-name
+                         :path module-path
+                         :body (read-file module-path)
+                         :deps [] }
+              new-deps (conj (session :deps) module)]
+          (swap! (*bop* :session) assoc :deps new-deps)))
     nil))
+
 
 (defn eval-module-1
   [form]
+  (println form)
   (let [head (first form)
         tail (rest  form)]
     (condp = head
+      'use      (do (println " using ::" (apply str tail))
+                    (doseq [module tail] (use-module module)))
       'metadata (let [info (make-map tail)]
                   (println "\nauthor ::" (info :author)
                            "\n title ::" (info :title)))
-      'use      (do (println " using ::" (apply str tail))
-                    (doseq [module tail] (use-module module)))
       nil)))
 
 
@@ -86,7 +94,7 @@
 
 (defn eval-file
   [path]
-  (repl/evaluate-code (read-file path)))
+  (repl/evaluate-code (get-file-contents path)))
 
 
 ; print
@@ -98,7 +106,7 @@
     (let [round   #((.-round js/Math) %)
           padding (round (/ (- width (count string)) 2))
           pad     (apply str (repeat padding " "))]
-      (str pad string pad))))
+      (str pad string pad))) )
 
 
 (defn run-repl
@@ -117,7 +125,7 @@
 
     (.on rl "close"
       (fn [] (println (str "<EXIT>\n" (centered GOODBYE)))
-             (.exit js/process 0)))))
+             (.exit js/process 0))) ))
 
 
 ; global state
@@ -127,9 +135,11 @@
                              (.resolve (js/require "path") session)
                              "untitled")]
 
-  (def *bop* { :cwd          (.cwd js/process)
-               :session-path session-path
-               :session      (read-cljs session-path) }))
+  (def *bop* { :cwd     (.cwd js/process)
+               :session (atom {:name "session"
+                               :path session-path
+                               :body (read-file session-path)
+                               :deps []}) }))
 
 
 ; startup
@@ -154,7 +164,7 @@
   (println "*bop*" *bop*)
 
   ;; evaluate session contents
-  (eval-module (*bop* :session))
+  (eval-module (@(*bop* :session) :body))
 
   ;; setup readline interface to repl
   (println)
