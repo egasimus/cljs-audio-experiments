@@ -1,3 +1,9 @@
-(let osc (js/require "node-osc")
+(let [osc    (js/require "node-osc")
+      Server (.-Server osc)
+      server (Server. 3333 "0.0.0.0")]
+  (.on server "message"
+    (fn [msg rinfo]
+      (trigger :osc-msg { :msg  msg
+                          :info rinfo })) ))
 
-    (def *osc-server* (.Server osc 3333 "0.0.0.0")))
+(println *bop*)

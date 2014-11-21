@@ -61,22 +61,21 @@
 (defn use-module
   [module-name]
   (if-let [module-path (resolve-module module-name)]
-    (do (println "loading module" module-name "from" module-path)
-        (let [session  @(*bop* :session)
+    (do (let [session  @(*bop* :session)
               module   { :name module-name
                          :path module-path
                          :body (read-file module-path)
                          :deps [] }
               new-deps (conj (session :deps) module)]
-          (swap! (*bop* :session) assoc :deps new-deps)))
+          (swap! (*bop* :session) assoc :deps new-deps)A
+          (eval-file module-path)))
     nil))
 
 
 (defn eval-module-1
-  [form]
-  (println form)
-  (let [head (first form)
-        tail (rest  form)]
+  [f]
+  (let [head (first f)
+        tail (rest  f)]
     (condp = head
       'use      (do (println " using ::" (apply str tail))
                     (doseq [module tail] (use-module module)))
@@ -87,9 +86,8 @@
 
 
 (defn eval-module
-  [module]
-  (doseq [form module]
-    (eval-module-1 form)))
+  [forms]
+  (doseq [f forms] (eval-module-1 f)))
 
 
 (defn eval-file
@@ -128,7 +126,27 @@
              (.exit js/process 0))) ))
 
 
-; global state
+; event system
+
+
+(defn on
+  [event handler]
+  (let [event-map   @(*bop* :events)
+        event-hooks (or (event-map event) [])
+        new-events  (assoc event-map event (conj event-hooks handler))]
+    (reset! (*bop* :events) new-events)))
+
+
+(defn trigger
+  ([event] (trigger event params))
+  ([event params]
+    (let [event-hooks (@(*bop* :events) event)]
+      (doseq [hook event-hooks]
+        (hook paramse))) ))
+
+
+; some ridiculous amount of global state is pushed onto here...
+; disgusting to say the least:
 
 
 (let [session-path (if-let [session (nth (.-argv js/process) 2)]
@@ -139,10 +157,12 @@
                :session (atom {:name "session"
                                :path session-path
                                :body (read-file session-path)
-                               :deps []}) }))
+                               :deps []} )
+               :events  (atom {})}) )
 
 
-; startup
+; with all that out of the way,
+; let's try our hand at startup
 
 
 (set! *main-cli-fn* (fn
