@@ -1,5 +1,5 @@
 ;(metadata 
-  ;:title  "Four sampling tracks."
+  ;:title  "Four SooperLooper tracks."
   ;:author "Mlad Konstruktor <fallenblood@gmail.com>")
 
 
@@ -9,10 +9,13 @@
 (use-module "midi")
 
 
-(on :midi-msg (fn [args] (println args)))
+(on :midi-in (fn [args] (println args)))
 
 
-(on :osc-msg  (fn [args] (println args)))
+(on :osc-in  (fn [args] (println args)))
+
+
+(trigger :midi-out 176 0 127)
 
 
 ;(track "Deck A"

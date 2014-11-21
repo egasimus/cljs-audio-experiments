@@ -120,8 +120,7 @@
 
 
 (defn trigger
-  ([event] (trigger event params))
-  ([event params]
+  ([event & params]
     (let [event-hooks (@(*bop* :events) event)]
       (doseq [hook event-hooks]
         (hook params))) ))
