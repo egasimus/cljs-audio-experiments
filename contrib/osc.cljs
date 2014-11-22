@@ -9,10 +9,11 @@
     (fn [msg rinfo]
       (trigger :osc-in msg rinfo)))
 
+  (on :osc-send
+    (fn [client msg args]
+      (println client msg args)
+      (apply .send client msg args)))
+
   (on :osc-connect
-    (fn [args]
-      (let [addr     (nth args 0)
-            port     (nth args 1)
-            callback (nth args 2)
-            client   (Client. addr port)]
-        (callback client)))))
+    (fn [addr port callbackrgs]
+      (callback (Client. addr port)))))

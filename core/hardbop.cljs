@@ -123,7 +123,7 @@
   ([event & params]
     (let [event-hooks (@(*bop* :events) event)]
       (doseq [hook event-hooks]
-        (hook params))) ))
+        (apply hook params))) ))
 
 
 ; some ridiculous amount of global state is pushed onto here...

@@ -8,10 +8,10 @@
 
   (.openPort output 1)
   (on :midi-out
-    (fn [args]
-      (.sendMessage output (into-array args))))
+    (fn [status data1 data2]
+      (.sendMessage output (array status data1 data2))) )
 
   (.openPort input 1)
   (.on input "message"
     (fn [delta-time message]
-      (trigger :midi-in [delta-time message])) ))
+      (trigger :midi-in delta-time message))) )
