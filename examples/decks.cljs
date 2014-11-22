@@ -27,8 +27,8 @@
                        (> pos 22) 0
                        :else      (+ 1 pos))]
     (when (= pos 0)
-      (println 0)
-      (trigger :osc-send "/sl/0/hit" "trigger"))
+      (println 0))
+      ;(trigger :osc-send "/sl/0/hit" "trigger"))
     (doseq [i [0  1  2  3  4  5  6  7
               16 17 18 19 20 21 22 23]]
       (trigger :midi-out 144 i 0))
@@ -47,19 +47,19 @@
       (fn [client]
         (.send client "/sl/0/load_loop" sample "" "")
         (.send client "/sl/0/hit" "trigger")
-        (.send client "/ping" "localhost:3333" "/pong")))
+        (.send client "/ping" "localhost:3333" "/pong")
 
-    (on :beat
-      (fn [args]
-        (swap! position looper-1)))
+        (on :beat
+          (fn [args]
+            (swap! position looper-1)))
 
-    (on :midi-in
-      (fn [delta-time [status data1 data2]]
-        (when (= data2 127) (reset! position (looper-1 data1))) ))
+        (on :midi-in
+          (fn [delta-time [status data1 data2]]
+            (when (= data2 127) (reset! position (looper-1 data1))) ))
 
-    (on :osc-in
-      (fn [& args]
-        (println "and again" args))) ))
+        (on :osc-in
+          (fn [& args]
+            (println "and again" args))) ))) )
 
 
 (looper "/home/epimetheus/hear/samples/kunststruktur/drums/140bpm-vec3-breakbeat-011.wav")
