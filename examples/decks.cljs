@@ -47,9 +47,10 @@
 
     (trigger :osc-connect "localhost" "9951"
       (fn [client]
-        (println (.-send client))
-        (.send client "/sl/0/load_loop" sample "" "")
-        (.send client "/ping" "localhost:3333" "/pong")
+        (.send client (osc-bundle [
+          ["/sl/0/load_loop" sample "" ""]
+          ["/sl/0/hit"       "trigger"]
+          ["/ping"           "localhost:3333" "/pong"]]))
 
         (on :beat
           (fn [args]
