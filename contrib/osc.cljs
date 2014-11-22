@@ -11,9 +11,8 @@
 
   (on :osc-send
     (fn [client msg args]
-      (println client msg args)
-      (apply .send client msg args)))
+      (apply (.-send client) msg args)))
 
   (on :osc-connect
-    (fn [addr port callbackrgs]
+    (fn [addr port callback]
       (callback (Client. addr port)))))
