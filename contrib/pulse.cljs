@@ -6,4 +6,4 @@
   (.on core1
     "NewPlaybackStream"
     (fn [path args sig]
-      (println path args sig))))
+      (apply trigger :pulse-new-playback-stream args))))
