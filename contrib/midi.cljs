@@ -23,8 +23,8 @@
       (reset! midi-ins  inputs)
       (reset! midi-outs outputs)
 
-      { :ins  inputs
-        :outs outputs }))
+      { :in  inputs
+        :out outputs }))
 
   (defn open-midi-in
     [port]
@@ -56,9 +56,8 @@
     [& args]
     (apply midi-send (apply make-midi-msg args)))
 
-  (on :midi-out #(send-midi-msg %1 %2 %3))
+  (on :midi-out #(midi-send %1 %2 %3))
 
-  (.openPort input 1)
   (.on input "message"
     (fn [delta-time message]
       (trigger :midi-in delta-time message))) )
