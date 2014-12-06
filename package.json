@@ -1,13 +1,28 @@
-{ "name":         "boq",
-  "version":      "0.0.1",
-  "description":  "guerilla DAW",
-  "author":       "Adam Avramov <fallenblood@gmail.com>",
-  "bin":          { "module-name": "./bop" },
-  "repository":   { "type": "git", "url": "https://github.com/egasimus/hardbop.git" },
-  "keywords":     [ "daw", "audio", "osc", "midi" ],
-  "dependencies": { "midi":     "~0.9",
-                    "moment":   "^2.8.4",
-                    "node-osc": "~0.3" },
+{
+  "name": "boq",
+  "version": "0.0.1",
+  "description": "guerilla DAW",
+  "author": "Adam Avramov <fallenblood@gmail.com>",
+  "bin": {
+    "module-name": "./bop"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/egasimus/hardbop.git"
+  },
+  "keywords": [
+    "daw",
+    "audio",
+    "osc",
+    "midi"
+  ],
+  "dependencies": {
+    "dbus-native": "^0.1.1",
+    "midi": "~0.9",
+    "moment": "^2.8.4",
+    "node-osc": "~0.3"
+  },
   "preferGlobal": true,
-  "private":      true,
-  "license":      "SPL v1.0" }
+  "private": true,
+  "license": "SPL v1.0"
+}

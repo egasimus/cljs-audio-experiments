@@ -72,7 +72,7 @@
                          :body (read-file module-path)
                          :deps [] }
               new-deps (conj (session :deps) module)]
-          (swap! (*bop* :session) assoc :deps new-deps)A
+          (swap! (*bop* :session) assoc :deps new-deps)
           (eval-file module-path)))
     nil))
 
