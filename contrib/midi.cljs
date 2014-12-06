@@ -35,13 +35,13 @@
     (.openPort output (@midi-outs port)))
 
   (def midi-msg-types
-    {:note-off   128
-     :note-on    144
-     :aftertouch 160
-     :control    176
-     :program    192
-     :pressure   208
-     :pitch      224})
+    { :note-off   128
+      :note-on    144
+      :aftertouch 160
+      :control    176
+      :program    192
+      :pressure   208
+      :pitch      224 })
 
   (defn make-midi-msg
     [typ chan data1 data2]

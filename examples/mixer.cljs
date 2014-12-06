@@ -12,7 +12,10 @@
 
       midi-in-name  (get-port-name :in  "Midi Fighter")
       
-      midi-out-name (get-port-name :out "Midi Fighter")]
+      midi-out-name (get-port-name :out "Midi Fighter")
+
+      clear-display (fn [] (doseq [cc (range 16)]
+                      (midi-out :control 1 cc 0))) ]
 
   (println)
 
@@ -21,4 +24,6 @@
 
   (println "Connecting to MIDI out:" midi-out-name)
   (open-midi-out midi-out-name)
+
+  (clear-display)
 )
