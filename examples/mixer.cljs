@@ -37,28 +37,28 @@
 
   (clear-display)
 
-
   ; Setup PulseAudio
+
+  (defn vol->cc [volume]
+    (.floor js/Math (* 127 (/ (first volume) volume-base))) )
+
+  (defn cc->vol [cc]
+    (.floor js/Math (* volume-base (/ cc 100))) )
 
   (add-watch playback-streams nil
     (fn [_ _ old-streams new-streams]
-      (println "\nUPDATED" old-streams "TO" new-streams)
       (clear-display)
       (doseq [cc (keys new-streams)]
         (midi-out :control 1 cc 1)
-
         (pulse-get-volume (new-streams cc)
           (fn [err vol]
-            (midi-out :control 0 cc (volume-to-cc vol))) ))) )
+            (midi-out :control 0 cc (vol->cc vol))) ))) )
 
   (defn first-free-slot [streams]
     (println "\nSTREAMS" streams)
     (if (nil? (keys streams))
       0
       (some #(if (nil? (streams %)) % nil) (range 16))))
-
-  (defn volume-to-cc [volume]
-    (.floor js/Math (* 127 (/ (first volume) volume-base))) )
 
   (on :pulse-new-playback-stream
     (fn [& args]
@@ -74,7 +74,17 @@
       (let [path (first args)]
         (swap! playback-streams
           (fn [streams]
-            (println (.-path (streams 0)))
             (dissoc streams 
               (first (filter #(= path (.-path (streams %)))
-                             (keys streams))) ))) ))) )
+                             (keys streams))) ))) )))
+
+  (on :midi-in (fn [_ msg]
+    (let [msg    (apply unpack-midi-msg msg)
+          stream (@playback-streams (:data1 msg))]
+      (when stream
+        (pulse-set-volume stream (cc->vol (:data2 msg))) ))) )
+
+      ;(pulse-set-volume (@playback-streams (:data1 msg))
+                        ;(:data2 msg))) ))
+
+)

@@ -34,7 +34,7 @@
     [port]
     (.openPort output (@midi-outs port)))
 
-  (def midi-msg-types
+  (def event->nibble
     { :note-off   128
       :note-on    144
       :aftertouch 160
@@ -43,10 +43,26 @@
       :pressure   208
       :pitch      224 })
 
-  (defn make-midi-msg
+  (def nibble->event
+    { 128 :note-off
+      144 :note-on
+      160 :aftertouch
+      176 :control
+      192 :program
+      208 :pressure
+      224 :pitch })
+
+  (defn pack-midi-msg
     [typ chan data1 data2]
     (let [args (hash-map args)]
-      (vector (+ (midi-msg-types typ) chan) data1 data2)))
+      (vector (+ (event->nibble typ) chan) data1 data2)))
+
+  (defn unpack-midi-msg
+    [data0 data1 data2]
+    {:type    (nibble->event (* 16 (.floor js/Math (/ 160 16))))
+     :channel (mod data0 16)
+     :data1   data1
+     :data2   data2})
 
   (defn midi-send
     [status data1 data2]
@@ -54,10 +70,10 @@
 
   (defn midi-out
     [& args]
-    (apply midi-send (apply make-midi-msg args)))
+    (apply midi-send (apply pack-midi-msg args)))
 
   (on :midi-out #(midi-send %1 %2 %3))
 
   (.on input "message"
-    (fn [delta-time message]
-      (trigger :midi-in delta-time message))) )
+    (fn [delta-time msg]
+      (trigger :midi-in delta-time msg))) )
