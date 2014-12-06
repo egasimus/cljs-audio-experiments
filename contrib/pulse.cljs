@@ -6,4 +6,9 @@
   (.on core1
     "NewPlaybackStream"
     (fn [path args sig]
-      (apply trigger :pulse-new-playback-stream args))))
+      (apply trigger :pulse-new-playback-stream args)))
+
+  (.on core1
+    "PlaybackStreamRemoved"
+    (fn [path args sig]
+      (apply trigger :pulse-playback-stream-removed args))) )

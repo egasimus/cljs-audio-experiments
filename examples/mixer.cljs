@@ -36,6 +36,7 @@
   (add-watch playback-streams nil
     (fn [_ _ old-streams new-streams]
       (println "\nUPDATED" old-streams "TO" new-streams)
+      (clear-display)
       (doseq [cc (keys new-streams)]
         (midi-out :control 1 cc 1))))
 
@@ -50,4 +51,13 @@
       (let [path (first args)]
         (swap! playback-streams
           (fn [streams]
-            (assoc streams (first-free-slot streams) path))) ))) )
+            (assoc streams (first-free-slot streams) path))) )))
+
+  (on :pulse-playback-stream-removed
+    (fn [& args]
+      (let [path (first args)]
+        (swap! playback-streams
+          (fn [streams]
+            (dissoc streams 
+              (first (filter (comp #{path} streams)
+                             (keys streams))) ))) ))) )
