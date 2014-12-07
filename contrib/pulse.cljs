@@ -3,6 +3,10 @@
       Core1 (.-Core1 pulse)
       core1 (Core1.)]
 
+  (defn pulse-get-playback-streams
+    [callback]
+    (.getPlaybackStreams core1 callback))
+
   (defn pulse-get-stream
     [path callback]
     (.getStream core1 path callback))
