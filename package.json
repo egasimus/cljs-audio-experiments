@@ -18,9 +18,11 @@
   ],
   "dependencies": {
     "dbus-native": "^0.1.1",
+    "jack-connector": "^0.1.4",
     "midi": "~0.9",
     "moment": "^2.8.4",
-    "node-osc": "~0.3"
+    "node-osc": "~0.3",
+    "node-pulseaudio-dbus": "git+http://github.com/egasimus/node-pulseaudio-dbus/"
   },
   "preferGlobal": true,
   "private": true,

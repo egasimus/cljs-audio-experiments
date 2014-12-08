@@ -18,14 +18,16 @@
                              msgs2 (into-array msgs1)]
                         msgs2)))
 
+  (defn osc-connect [addr port callback]
+    (callback (Client. addr port)))
+
+  (defn osc-send [client msg args]
+    (apply (.-send client) msg args))
+
   (.on server "message"
     (fn [msg rinfo]
-      (trigger :osc-in msg rinfo)))
+      (emit :osc-in msg rinfo)))
 
-  (on :osc-send
-    (fn [client msg args]
-      (apply (.-send client) msg args)))
+  (on :osc-send osc-send)
 
-  (on :osc-connect
-    (fn [addr port callback]
-      (callback (Client. addr port)))))
+  (on :osc-connect osc-connect))

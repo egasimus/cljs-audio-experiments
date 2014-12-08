@@ -76,4 +76,4 @@
 
   (.on input "message"
     (fn [delta-time msg]
-      (trigger :midi-in delta-time msg))) )
+      (emit :midi-in delta-time msg))) )

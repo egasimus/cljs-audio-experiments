@@ -1,7 +1,8 @@
 (use-module "pulse")
-
-
 (use-module "midi")
+(use-module "osc")
+(use-module "spawn")
+;(use-module "jack")
 
 
 (let [midi-ports       (refresh-midi-ports)
@@ -22,7 +23,9 @@
 
       volume-base      65535
 
-      playback-streams (atom {})]
+      playback-streams (atom {})
+
+      non-mixer-port   10000]
 
 
   ; Setup MIDI
@@ -104,7 +107,13 @@
     (fn [err stream-paths]
       (patch-streams! playback-streams stream-paths)))
 
-      ;(pulse-set-volume (@playback-streams (:data1 msg))
-                        ;(:data2 msg))) ))
+
+  ; Setup JACK mixing via Non-Mixer
+  
+  (spawn "non-mixer" ["--osc-port" non-mixer-port])
+
+  (osc-connect "127.0.0.1" non-mixer-port
+    (fn [client]
+      (println "OSC" client)))
 
 )

@@ -119,7 +119,7 @@
     (reset! (*bop* :events) new-events)))
 
 
-(defn trigger
+(defn emit
   ([event & params]
     (let [event-hooks (@(*bop* :events) event)]
       (doseq [hook event-hooks]
