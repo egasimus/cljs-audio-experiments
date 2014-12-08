@@ -79,7 +79,6 @@
 
   (defn patch-streams!
     [old-streams new-stream-paths]
-    (println "PATCHING" old-streams new-stream-paths)
     (let [is-new? #(nil? ((streams->paths @old-streams) %))]
       (doseq [path new-stream-paths]
         (when (is-new? path)
@@ -110,10 +109,14 @@
 
   ; Setup JACK mixing via Non-Mixer
   
-  (spawn "non-mixer" ["--osc-port" non-mixer-port])
+  (spawn "non-mixer" (array "--osc-port" non-mixer-port))
 
-  (osc-connect "127.0.0.1" non-mixer-port
-    (fn [client]
-      (println "OSC" client)))
+  (defn after [t f]
+    (js/setTimeout f t))
+
+  (after 1000 (fn []
+    (osc-connect "127.0.0.1" non-mixer-port
+      (fn [client]
+        (osc-send client "/non/mixer/add_strip")))))
 
 )

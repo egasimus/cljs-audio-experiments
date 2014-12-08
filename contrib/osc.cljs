@@ -21,8 +21,11 @@
   (defn osc-connect [addr port callback]
     (callback (Client. addr port)))
 
-  (defn osc-send [client msg args]
-    (apply (.-send client) msg args))
+  (defn osc-send
+    ([client msg]
+      (.send client msg (array)))
+    ([client msg args]
+      (.send client msg args)))
 
   (.on server "message"
     (fn [msg rinfo]
