@@ -117,6 +117,7 @@
   (after 1000 (fn []
     (osc-connect "127.0.0.1" non-mixer-port
       (fn [client]
+        (osc-send client "/non/mixer/add_strip")
         (osc-send client "/non/mixer/add_strip")))))
 
 )
