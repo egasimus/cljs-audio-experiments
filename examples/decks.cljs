@@ -5,7 +5,7 @@
 
 (use-module "osc")
 (use-module "midi")
-;(use-module "spawn")
+(use-module "spawn")
 
 
 ; utility functions
@@ -22,10 +22,25 @@
     (and (>= data1 16) (<= data1 23))  (- data1 8)))
 
 
-(defn next-pos [pos]
+(defn advance-pos [pos]
   (if (and (>= pos 0) (< pos 15))
     (+ 1 pos)
     0))
+
+(defn lpd-clear! []
+  (doseq [cc (concat (range 8)
+                     (range 16 24))]
+    (midi-send 176 0 0)
+    (midi-send 176 0 1)))
+
+(defn lpd-red! [pos]
+  (midi-send 144 pos 3))
+
+(defn lpd-green! [pos]
+  (midi-send 144 pos 48))
+
+(defn lpd-yellow! [pos]
+  (midi-send 144 pos 51))
 
 
 ; looper control
@@ -33,33 +48,48 @@
 (defn looper
   [sample]
 
+  ;(spawn "/home/epimetheus/code/kunst/postmelodic/bin/sample_player" (array sample))
+
   (osc-connect
     "localhost"
-    "77070"
+    "7770"
     (fn [client]
 
-      (let [cue   (fn [point frame]
-                    (.send client (osc-message "/cue" 0 point frame)))
-            seek  (fn [point]
-                    (.send client (osc-message "/play" 0 point)))
-            position (atom 0)]
+      (let [cue      (fn [point frame]
+                       (.send client (osc-message "/cue" 0 point frame)))
+
+            seek     (fn [point]
+                       (.send client (osc-message "/play" 0 point)))
+
+            position (atom 0)
+
+            next-pos (atom nil)]
 
         (println "connected to sampler at :7770")
 
+        (doseq [i (range 16)] (cue i (.floor js/Math (* (/ 151202 16) i))))
+
+        (add-watch position nil
+          (fn [_ _ old-pos new-pos]
+            (lpd-clear!)
+            (lpd-yellow! (pos->lpd new-pos))
+            (seek new-pos)))
+
+        (reset! position 0)
+
         (on :beat
           (fn [args]
-            (doseq [i [0  1  2  3  4  5  6  7
-                      16 17 18 19 20 21 22 23]]
-              (midi-send 144 i 0))
-
-            (midi-send 144 (pos->lpd @position) 15)
-            (swap! position next-pos)))
+            (if @next-pos (do (reset! position @next-pos)
+                              (reset! next-pos nil))
+                          (swap! position advance-pos))))
 
         (on :midi-in
-          (fn [_ [status data1 data2]]
-            (when (= data2 127)
-              (when-let [pos (lpd->pos data1)]
-                (reset! position pos))) ))) )))
+          (fn [_ msg]
+            (let [msg (apply unpack-midi-msg msg)
+                  hit (= 127 (:data2 msg))
+                  jmp (lpd->pos (:data1 msg))]
+              (when (and hit jmp) (lpd-red! (:data1 msg))
+                                  (reset! next-pos jmp))) ))) )))
 
 
 ; initialize looper with midi
@@ -74,11 +104,7 @@
 
        midi-in-name     (get-port-name :in  "Launchpad")
 
-       midi-out-name    (get-port-name :out "Launchpad")
-
-       clear-display!   (fn [] (doseq [cc (range 16)]
-                          (midi-send 176 0 0)
-                          (midi-send 176 0 1))) ]
+       midi-out-name    (get-port-name :out "Launchpad") ]
 
   ; Setup MIDI
 
@@ -90,16 +116,16 @@
   (println "Connecting to MIDI out:" midi-out-name)
   (open-midi-out midi-out-name)
 
-  (clear-display!)
-  
+  (lpd-clear!)
+
   ; Start looper  
 
-  (looper "nevermind"))
+  (looper "/home/epimetheus/code/kunst/postmelodic/data/breakbeat-140bpm.wav"))
 
 
 ; tick tock, mock clock
 
 (let [timers (js/require "timers")]
-  (on :beat (fn [args] (.setTimeout timers #(trigger :beat) 214))))
+  (on :beat (fn [args] (.setTimeout timers #(emit :beat) 214))))
 
-(trigger :beat)
+(emit :beat)
