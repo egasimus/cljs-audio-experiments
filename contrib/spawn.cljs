@@ -12,7 +12,8 @@
       (.on (.-stderr child-process) "data"
         (fn [data] (log :vst-stderr data)))
       (.on js/process "exit"
-        (fn [_] (.kill child-process))) )))
+        (fn [_] (.kill child-process)))
+      child-process)))
 
 
 (defn extend-env

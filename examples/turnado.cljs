@@ -9,6 +9,12 @@
         options     ["env"      (extend-env "VST_PATH" vst-path)
                      "detached" true]
         vst-process (spawn command arguments options)]
+
+    (.on (.-stdout vst-process) "data" (fn [data]
+      (let [data (.trim (str data))]
+        (if (> (.indexOf data "OSC URL is") -1)
+          (log :vst-meta "Here's our OSC URL!")))))
+
     (println vst-process)))
 
 
