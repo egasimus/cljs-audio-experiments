@@ -17,6 +17,7 @@
     "midi"
   ],
   "dependencies": {
+    "colors": "^1.0.3",
     "dbus-native": "^0.1.1",
     "jack-connector": "^0.1.4",
     "midi": "~0.9",

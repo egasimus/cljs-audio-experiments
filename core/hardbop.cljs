@@ -3,7 +3,10 @@
             [cljs.repl   :as repl]))
 
 
-; pleasantries
+(js/require "colors")
+
+
+;; pleasantries
 
 
 (def HELLO   "!bopbop boq doqdoq¡")
@@ -11,7 +14,7 @@
 (def GOODBYE "?qodqoq pod bopbop¿")
 
 
-; read
+;; read
  
 
 (defn get-file-contents
@@ -36,7 +39,7 @@
       [])))
 
 
-; evaluate
+;; evaluate
 
 
 (defn make-map
@@ -77,7 +80,7 @@
     nil))
 
 
-; print
+;; printing, logging
 
 
 (defn centered
@@ -87,6 +90,11 @@
           padding (round (/ (- width (count string)) 2))
           pad     (apply str (repeat padding " "))]
       (str pad string pad))) )
+
+
+(defn log [target & values]
+  (let [target-name (.substring (str target) 1)]
+    (println (apply str (.-cyan (str "[" target-name "] ")) values))) )
 
 
 (defn run-repl
@@ -108,7 +116,7 @@
              (.exit js/process 0))) ))
 
 
-; event system
+;; event system
 
 
 (defn on
@@ -132,7 +140,7 @@
 (def *bop* { :cwd       (.cwd js/process)
              :session   (atom {})
              :events    (atom {})
-             :verbosity :warnings })
+             :verbosity (atom {}) })
 
 
 ;; session loader
@@ -142,17 +150,17 @@
   (if (string? session-path)
     (let [full-session-path (.resolve (js/require "path") session-path)]
       (if (.existsSync (js/require "fs") full-session-path)
-        (do (println "Opening session" full-session-path)
+        (do (log :session "Opening session" full-session-path)
             (reset! (:session *bop*) { :name "session-path"
                                        :path full-session-path
                                        :body (read-file full-session-path) })
             (eval-file full-session-path))
-        (println "File not found:" full-session-path)))
-    (println session-path "is not a valid session path.")))
+        (log :session "File not found:" full-session-path)))
+    (log :session session-path "is not a valid session path.")))
 
 
-; with all that out of the way,
-; let's try our hand at startup
+;; with all that out of the way,
+;; let's try our hand at startup
 
 
 (set! *main-cli-fn* (fn
@@ -175,10 +183,9 @@
   ; load session if passed to command line
   (if-let [session (nth (.-argv js/process) 2)]
     (open-session! session)
-    (println "Starting new session."))
+    (log :session "Starting new session."))
 
   ; evaluate session contents
 
   ; setup readline interface to repl
-  (println)
   (run-repl)))

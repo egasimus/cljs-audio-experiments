@@ -1,12 +1,13 @@
 // Simple module wrapper around Google Closure Library
 // goog/ directory should be in the same directory as this file
 
-goog = exports;
-path_ = require("path");
+goog     = exports;
+path_    = require("path");
+vm_      = require("vm");
 googDir_ = path_.join(path_.dirname(module.filename), "goog");
 
 rawLoaded_ = {};
-rawLoad_ = function(file) {
+rawLoad_   = function(file) {
   var path = path_.resolve(googDir_, file);
   //console.log("rawLoad_ file:", file, "path:", path);
 
@@ -16,8 +17,9 @@ rawLoad_ = function(file) {
   var contents = require('fs').readFileSync(path);
   // TODO: cljs.nodejscli needs require, but this is gross
   global.require = require;
-  process.binding('evals').NodeScript.
-      runInThisContext.call(global, contents, file);
+  //process.binding('evals').NodeScript.
+      //runInThisContext.call(global, contents, file);
+  vm_.runInThisContext.call(global, contents, file);
 };
 
 rawLoad_('base.js');
