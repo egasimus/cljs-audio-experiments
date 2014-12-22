@@ -6,11 +6,7 @@
     (let [arguments     (into-array arguments)
           options       (apply js-obj options)
           child-process (-spawn command arguments options)]
-      (log :vst "Running:" command arguments options)
-      (.on (.-stdout child-process) "data"
-        (fn [data] (log :vst-stdout data)))
-      (.on (.-stderr child-process) "data"
-        (fn [data] (log :vst-stderr data)))
+      (log :spawn "Running:" command arguments options)
       (.on js/process "exit"
         (fn [_] (.kill child-process)))
       child-process)))
