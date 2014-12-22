@@ -15,23 +15,23 @@
     (and (>= pos 0) (<= pos 7)) pos
     (and (>= pos 8) (<= pos 15))  (+ pos 8)))
 
-
 (defn lpd->pos [data1]
   (cond
     (and (>= data1 0)  (<= data1 7))   data1
     (and (>= data1 16) (<= data1 23))  (- data1 8)))
-
 
 (defn advance-pos [pos]
   (if (and (>= pos 0) (< pos 15))
     (+ 1 pos)
     0))
 
-(defn lpd-clear! []
-  (doseq [cc (concat (range 8)
-                     (range 16 24))]
-    (midi-send 176 0 0)
-    (midi-send 176 0 1)))
+(defn lpd-clear!
+  ([] (doseq [cc (concat (range 8)
+                        (range 16 24))]
+      (midi-send 176 0 0)
+      (midi-send 176 0 1)))
+  ([cell])        ; TODO
+  ([start end]))  ; TODO
 
 (defn lpd-red! [pos]
   (midi-send 144 pos 3))
@@ -92,6 +92,9 @@
                                   (reset! next-pos jmp))) ))) )))
 
 
+(defn btn-fader [start end])
+
+
 ; initialize looper with midi
 
 (let [ midi-ports       (refresh-midi-ports)
@@ -117,6 +120,10 @@
   (open-midi-out midi-out-name)
 
   (lpd-clear!)
+
+  ; Start pseudo-faders
+
+  (btn-fader "1H" "1C")
 
   ; Start looper  
 

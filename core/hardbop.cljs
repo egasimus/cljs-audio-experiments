@@ -93,7 +93,7 @@
   []
   (let [readline (js/require "readline")
         rl       (.createInterface readline js/process.stdin js/process.stdout)]
-    (.setPrompt rl (repl/prompt))
+    (.setPrompt rl (str "\n" (repl/prompt)))
     (.prompt rl)
 
     (.on rl "line"
@@ -126,20 +126,29 @@
         (apply hook params))) ))
 
 
-; some ridiculous amount of global state is pushed onto here...
-; disgusting to say the least:
+;; global state
 
 
-(let [session-path (if-let [session (nth (.-argv js/process) 2)]
-                             (.resolve (js/require "path") session)
-                             "untitled")]
+(def *bop* { :cwd       (.cwd js/process)
+             :session   (atom {})
+             :events    (atom {})
+             :verbosity :warnings })
 
-  (def *bop* { :cwd     (.cwd js/process)
-               :session (atom {:name "session"
-                               :path session-path
-                               :body (read-file session-path)
-                               :deps []} )
-               :events  (atom {})}) )
+
+;; session loader
+
+
+(defn open-session! [session-path]
+  (if (string? session-path)
+    (let [full-session-path (.resolve (js/require "path") session-path)]
+      (if (.existsSync (js/require "fs") full-session-path)
+        (do (println "Opening session" full-session-path)
+            (reset! (:session *bop*) { :name "session-path"
+                                       :path full-session-path
+                                       :body (read-file full-session-path) })
+            (eval-file full-session-path))
+        (println "File not found:" full-session-path)))
+    (println session-path "is not a valid session path.")))
 
 
 ; with all that out of the way,
@@ -149,10 +158,10 @@
 (set! *main-cli-fn* (fn
   [& args]
 
-  ;; we're home
+  ; we're home
   (repl/init)
 
-  ;; setup print functions
+  ; setup print functions
   (let [stdout #(.write (.-stdout js/process) %)
         stderr #(.write (.-stderr js/process) %)]
     (set! *err* stderr)
@@ -160,12 +169,16 @@
     (set! *rtn* stdout)
     (set! *print-fn* stdout))
 
-  ;; oh my, where are our manners?
+  ; oh my, where are our manners?
   (println (str (centered HELLO) "\n"))
 
-  ;; evaluate session contents
-  (eval-file (@(*bop* :session) :path))
+  ; load session if passed to command line
+  (if-let [session (nth (.-argv js/process) 2)]
+    (open-session! session)
+    (println "Starting new session."))
 
-  ;; setup readline interface to repl
+  ; evaluate session contents
+
+  ; setup readline interface to repl
   (println)
   (run-repl)))
