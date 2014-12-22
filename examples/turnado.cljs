@@ -2,8 +2,14 @@
 (use-module "midi")
 (use-module "spawn")
 
+
 (defn vst [vst-path vst-name]
-  (let [vst-process (spawn "jack-dssi-host"
-                           (array  (str "dssi-vst.so:" vst-name))
-                           (js-obj "env" (js-obj "VST_PATH" vst-path)))]
+  (let [command     "jack-dssi-host"
+        arguments   [(str "dssi-vst.so:" vst-name)]
+        options     ["env"      (extend-env "VST_PATH" vst-path)
+                     "detached" true]
+        vst-process (spawn command arguments options)]
     (println vst-process)))
+
+
+(vst "/home/epimetheus/vst/Swierk/" "Swierk.dll")

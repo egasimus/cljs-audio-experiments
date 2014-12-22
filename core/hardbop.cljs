@@ -94,7 +94,8 @@
 
 (defn log [target & values]
   (let [target-name (.substring (str target) 1)]
-    (println (apply str (.-cyan (str "[" target-name "] ")) values))) )
+    (println (apply str (.-cyan (str "[" target-name "] "))
+             (apply str (interpose " " values))) )))
 
 
 (defn run-repl
