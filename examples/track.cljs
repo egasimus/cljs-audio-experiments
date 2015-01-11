@@ -7,50 +7,55 @@
 
 (let [path (js/require "path")]
 
-  (defn spawn-vst [vst]
-    (let [vst-path (.resolve path (vst :path))
-          vst-dir  (.dirname path vst-path)
-          vst-file (str (.basename path vst-path))
-          vst-name (or (vst :name) (.basename vst-path))]
+  (defn spawn-vst
+    ([vst]
+      (spawn-vst vst nil))
 
-      (log :module "Spawning VST plugin" vst-name (str "(" vst-file ")"))
+    ([vst next-vst]
+      (let [vst-path (.resolve path (vst :path))
+            vst-dir  (.dirname path vst-path)
+            vst-file (str (.basename path vst-path))
+            vst-name (or (vst :name) (.basename vst-path))]
 
-      (let [arguments ["-c" vst-name
-                       vst-path]
-            options   ["env" (extend-env "VST_PATH"  vst-dir
-                                         "DSSI_PATH" "/home/epimetheus/code/kunst")]
-            vst-info  (atom { :process (execute "vsthost" arguments options) })]
+        (log :module "Spawning VST plugin" vst-name (str "(" vst-file "),"))
+        (when next-vst (log :module "Next module in chain is" (next-vst :name)))
 
-        ;(.on (.-stdout @vst-process) "data"
-          ;(fn [data] (log :vst-stdout data)))
+        (let [arguments ["-c" vst-name
+                         vst-path]
+              options   ["env" (extend-env "VST_PATH"  vst-dir
+                                           "DSSI_PATH" "/home/epimetheus/code/kunst")]
+              vst-info  (atom { :process (execute "vsthost" arguments options) })]
 
-        (add-watch vst-info nil
-          (fn [_ _ old-info new-info]
-            (println old-info new-info)))
+          ;(.on (.-stdout @vst-process) "data"
+            ;(fn [data] (log :vst-stdout data)))
 
-        (.on (.-stderr (@vst-info :process)) "data"
-          (fn [data]
-            (log :vst-stderr data)
-            (let [data (str data)
-                  jcn  "JACK client name: "
-                  jip  "JACK input port: "
-                  jop  "JACK output port: "]
+          (add-watch vst-info nil
+            (fn [_ _ old-info new-info]
+              (println old-info new-info)))
 
-              (when (= 0 (.indexOf (str data) jcn))
-                (swap! vst-info assoc :jack-name
-                  (.substr data (.-length jcn))))
+          (.on (.-stderr (@vst-info :process)) "data"
+            (fn [data]
+              (log :vst-stderr data)
+              (let [data (str data)
+                    jcn  "JACK client name: "
+                    jip  "JACK input port: "
+                    jop  "JACK output port: "]
 
-              (when (= 0 (.indexOf (str data) jip))
-                (swap! vst-info assoc :jack-inputs
-                  (conj (or (@vst-info :jack-inputs) []) (.substr data (.-length jip)))))
+                (when (= 0 (.indexOf (str data) jcn))
+                  (swap! vst-info assoc :jack-name
+                    (.substr data (.-length jcn))))
 
-              (when (= 0 (.indexOf (str data) jop))
-                (swap! vst-info assoc :jack-outputs
-                  (conj (or (@vst-info :jack-outputs) []) (.substr data (.-length jop)))))
+                (when (= 0 (.indexOf (str data) jip))
+                  (swap! vst-info assoc :jack-inputs
+                    (conj (or (@vst-info :jack-inputs) []) (.substr data (.-length jip)))))
 
-            )))
+                (when (= 0 (.indexOf (str data) jop))
+                  (swap! vst-info assoc :jack-outputs
+                    (conj (or (@vst-info :jack-outputs) []) (.substr data (.-length jop)))))
 
-        vst-info))))
+              )))
+
+          vst-info)))))
 
 
 (def *session* {
@@ -84,7 +89,10 @@
     (log :tracks
       "Creating track" (track :name))
 
-    (doseq [module (track :chain)]
-      (log :tracks
-        "Creating module" (module :name))
-      (spawn-vst module)) ) )
+    (loop
+      [chain (track :chain)]
+      (log :tracks "Creating module" (:name (first chain)))
+      (if (= 1 (count chain))
+        (spawn-vst (first chain))
+        (do (spawn-vst (first chain) (second chain))
+            (recur (rest chain)))))))
