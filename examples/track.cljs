@@ -5,29 +5,29 @@
 (on :jack-ports-updated (fn [ins outs] (println ins outs)))
 
 
-(defprotocol Spawnable
-  (spawn [this options]))
+(let [path (js/require "path")]
 
+  (defn spawn-vst [vst]
+    (let [vst-path (.resolve path (vst :path))
+          vst-dir  (.dirname path vst-path)
+          vst-file (str (.basename path vst-path))
+          vst-name (or (vst :name) (.basename vst-path))]
 
-(defn spawn-vst [vst]
-  (let [vst-path (vst :path)
-        vst-name (vst :name)]
+      (log :module "Spawning VST plugin" vst-name (str "(" vst-file ")"))
 
-    (log :module "Spawning module" vst-path vst-name)
+      (let [arguments   ["-c" vst-name
+                         vst-path]
+            options     ["env" (extend-env "VST_PATH"  vst-dir
+                                           "DSSI_PATH" "/home/epimetheus/code/kunst")]
+            vst-process (atom (execute "vsthost" arguments options))]
 
-    (let [arguments   ["-c" vst-name
-                       (str vst-path "/" vst-name)]
-          options     ["env" (extend-env "VST_PATH"  vst-path
-                                         "DSSI_PATH" "/home/epimetheus/code/kunst")]
-          vst-process (atom (execute "vsthost" arguments options))]
+        ;(.on (.-stdout @vst-process) "data"
+          ;(fn [data] (log :vst-stdout data)))
 
-      ;(.on (.-stdout @vst-process) "data"
-        ;(fn [data] (log :vst-stdout data)))
+        ;(.on (.-stderr @vst-process) "data"
+          ;(fn [data] (log :vst-stderr data)))
 
-      ;(.on (.-stderr @vst-process) "data"
-        ;(fn [data] (log :vst-stderr data)))
-
-      vst-process)))
+        vst-process))))
 
 
 (def *session* {
@@ -37,19 +37,19 @@
   :tracks [
     { :name  "Bass"
       :chain [ { :type :vst
-                 :path "/home/epimetheus/vst/Swierk"
+                 :path "/home/epimetheus/vst/Swierk/Swierk.dll"
                  :name "Swierk" }
                { :type :vst
-                 :path "/home/epimetheus/vst/Turnado"
-                 :name "Turnado32" } ] }
+                 :path "/home/epimetheus/vst/Turnado/Turnado32.dll"
+                 :name "Turnado" } ] }
 
     { :name  "Pad"
       :chain [ { :type :vst
-                 :path "/home/epimetheus/vst/Swierk"
+                 :path "/home/epimetheus/vst/Swierk/Swierk.dll"
                  :name "Swierk" }
                { :type :vst
-                 :path "/home/epimetheus/vst/Turnado"
-                 :name "Turnado32" } ] } ]
+                 :path "/home/epimetheus/vst/Turnado/Turnado.dll"
+                 :name "Turnado" } ] } ]
 
   :author "Mlad Konstruktor" } )
 
@@ -59,9 +59,9 @@
   (doseq [track (*session* :tracks)]
 
     (log :tracks
-      "Creating track " (track :name))
+      "Creating track" (track :name))
 
     (doseq [module (track :chain)]
       (log :tracks
-        "Creating module" (.-name module))
+        "Creating module" (module :name))
       (spawn-vst module)) ) )
