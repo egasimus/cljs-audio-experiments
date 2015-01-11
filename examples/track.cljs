@@ -1,4 +1,5 @@
 (use-module "execute")
+(use-module "jack")
 
 
 (deftype VST [vst-path vst-name])
@@ -40,16 +41,21 @@
   (spawn [this]
     (doseq [t (.-tracks this)]
       (log :tracks "Spawning" (first t))
-      (spawn (second t)))))
+      (spawn (second t))))
+)
       
 
 (def *session* (track-session
-    "Bass" (track-chain
-      (VST. "/home/epimetheus/vst/Swierk"  "Swierk")
-      (VST. "/home/epimetheus/vst/Turnado" "Turnado32"))
-    "Pad"  (track-chain
-      (VST. "/home/epimetheus/vst/Swierk"  "Swierk")
-      (VST. "/home/epimetheus/vst/Turnado" "Turnado32"))))
+
+  "Bass" (track-chain
+    (VST. "/home/epimetheus/vst/Swierk"  "Swierk")
+    (VST. "/home/epimetheus/vst/Turnado" "Turnado32"))
+
+  "Pad"  (track-chain
+    (VST. "/home/epimetheus/vst/Swierk"  "Swierk")
+    (VST. "/home/epimetheus/vst/Turnado" "Turnado32")))
+
+)
 
 
 (defn start []
