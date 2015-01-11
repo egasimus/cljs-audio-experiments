@@ -58,6 +58,34 @@
           vst-info)))))
 
 
+(defn start []
+
+  (doseq [track (*session* :tracks)]
+
+    (log :tracks
+      "Creating track" (track :name))
+
+    (println
+
+      (loop [connections []
+             chain       (track :chain)]
+
+        (if-not (= 1 (count chain))
+
+          (recur
+            (conj connections [(str (:name (first chain)) ":out_1") (str (:name (second chain)) ":in_1")]
+                              [(str (:name (first chain)) ":out_2") (str (:name (second chain)) ":in_2")])
+            (rest chain))
+
+          (conj connections [(str (:name (first chain)) ":out_1") (str "system:playback_1")]
+                            [(str (:name (first chain)) ":out_2") (str "system:playback_2")]))))
+
+))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (def *session* {
 
   :name "Test Session"
@@ -80,19 +108,3 @@
                  :name "Turnado" } ] } ]
 
   :author "Mlad Konstruktor" } )
-
-
-(defn start []
-
-  (doseq [track (*session* :tracks)]
-
-    (log :tracks
-      "Creating track" (track :name))
-
-    (loop
-      [chain (track :chain)]
-      (log :tracks "Creating module" (:name (first chain)))
-      (if (= 1 (count chain))
-        (spawn-vst (first chain))
-        (do (spawn-vst (first chain) (second chain))
-            (recur (rest chain)))))))
