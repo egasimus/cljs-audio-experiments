@@ -8,6 +8,7 @@
 
 (deftype VST [vst-path vst-name])
 
+
 (extend-protocol Spawnable VST
   (spawn [this options]
     (let [vst-path (.-vst-path this)
@@ -32,46 +33,33 @@
         vst-process))))
 
 
-(deftype TrackChain [modules])
-
-(extend-protocol Spawnable TrackChain
-  (spawn [this options]
-    (doseq [m (.-modules this)]
-      (log :track "Spawning module")
-      (spawn m { :parent this }))))
-
-(defn track-chain [& modules]
-  (TrackChain. modules))
-
-
-(deftype TrackSession [tracks])
-
-(extend-protocol Spawnable TrackSession
-  (spawn [this options]
-    (doseq [t (.-tracks this)]
-      (log :tracks "Spawning" (first t))
-      (spawn (second t) { :parent this
-                          :name   (first t) }) )))
-
-(defn track-session [& tracks]
-  (TrackSession. (apply hash-map tracks)))
-
-
 (on :jack-ports-updated (fn [ins outs] (println ins outs)))
 
 
-(def *session* (track-session
+(def *session* {
 
-  "Bass" (track-chain
-    (VST. "/home/epimetheus/vst/Swierk"  "Swierk")
-    (VST. "/home/epimetheus/vst/Turnado" "Turnado32"))
+  :name "Test Session"
 
-  "Pad"  (track-chain
-    (VST. "/home/epimetheus/vst/Swierk"  "Swierk")
-    (VST. "/home/epimetheus/vst/Turnado" "Turnado32")))
+  :tracks [
+    { :name  "Bass"
+      :chain [ (VST. "/home/epimetheus/vst/Swierk"  "Swierk")
+               (VST. "/home/epimetheus/vst/Turnado" "Turnado32") ] }
 
-)
+    { :name  "Pad"
+      :chain [ (VST. "/home/epimetheus/vst/Swierk"  "Swierk")
+               (VST. "/home/epimetheus/vst/Turnado" "Turnado32") ] } ]
+
+  :author "Mlad Konstruktor" } )
 
 
 (defn start []
-  (spawn *session* {}))
+
+  (doseq [track (*session* :tracks)]
+
+    (log :tracks
+      "Creating track " (track :name))
+
+    (doseq [module (track :chain)]
+      (log :tracks
+        "Creating module" (.-name module))
+      (spawn module {})) ) )
