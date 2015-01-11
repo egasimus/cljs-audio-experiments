@@ -43,7 +43,8 @@
       (log :tracks "Spawning" (first t))
       (spawn (second t))))
 )
-      
+
+(on :jack-ports-updated (fn [ins outs] (println ins outs)))
 
 (def *session* (track-session
 

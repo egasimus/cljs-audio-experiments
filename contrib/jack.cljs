@@ -13,8 +13,14 @@
                                      :outs ports-out }))
 
     (defn jack-refresh-ports []
-      (reset! ports-in  (apply vector (.getOutPortsSync jack)))
-      (reset! ports-out (apply vector (.getInPortsSync  jack))))
+      (let [ins    (vec (.getOutPortsSync jack))
+            outs   (vec (.getInPortsSync jack))
+            update (or (not (= ins  @ports-in))
+                       (not (= outs @ports-out)))]
+        (when update (do
+          (reset! ports-in  (apply vector (.getOutPortsSync jack)))
+          (reset! ports-out (apply vector (.getInPortsSync  jack)))
+          (emit :jack-ports-updated @ports-in @ports-out)))))
 
     ((fn timer []
       (jack-refresh-ports)
