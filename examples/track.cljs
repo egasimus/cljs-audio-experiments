@@ -23,7 +23,8 @@
           vst-name (.-vst-name this)]
       (log :module "Spawning module" vst-path vst-name)
       (let [arguments   [(str vst-path "/" vst-name)]
-            options     ["env" (extend-env "VST_PATH" vst-path)]
+            options     ["env" (extend-env "VST_PATH"  vst-path
+                                           "DSSI_PATH" "/home/epimetheus/code/kunst")]
             vst-process (atom (execute "vsthost" arguments options))]
         (.on (.-stdout @vst-process) "data"
           (fn [data] (log :vst-stdout data)))
@@ -44,7 +45,9 @@
       (spawn (second t))))
 )
 
+
 (on :jack-ports-updated (fn [ins outs] (println ins outs)))
+
 
 (def *session* (track-session
 
