@@ -5,7 +5,7 @@
 
 (use-module "osc")
 (use-module "midi")
-(use-module "spawn")
+(use-module "execute")
 
 
 ; utility functions
@@ -48,7 +48,7 @@
 (defn looper
   [sample]
 
-  ;(spawn "/home/epimetheus/code/kunst/postmelodic/bin/sample_player" (array sample))
+  ;(execute "/home/epimetheus/code/kunst/postmelodic/bin/sample_player" (array sample))
 
   (osc-connect
     "localhost"

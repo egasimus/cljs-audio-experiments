@@ -1,7 +1,7 @@
 (use-module "pulse")
 (use-module "midi")
 (use-module "osc")
-(use-module "spawn")
+(use-module "execute")
 ;(use-module "jack")
 
 
@@ -109,7 +109,7 @@
 
   ; Setup JACK mixing via Non-Mixer
   
-  (spawn "non-mixer" (array "--osc-port" non-mixer-port))
+  (execute "non-mixer" (array "--osc-port" non-mixer-port))
 
   (defn after [t f]
     (js/setTimeout f t))

@@ -1,7 +1,7 @@
 (let [-spawn    (.-spawn (js/require "child_process"))
       -openSync (.-openSync (js/require "fs"))]
 
-  (defn spawn
+  (defn execute
     [command arguments options]
     (let [arguments     (into-array arguments)
           options       (apply js-obj options)

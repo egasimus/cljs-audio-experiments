@@ -3,7 +3,23 @@
             [cljs.repl   :as repl]))
 
 
-(js/require "colors")
+;; logging
+
+
+(defn log [target & values]
+  (let [target-name (.-cyan (str "" (.substring (str target) 1) ""))
+        joined-vals (.trim (apply str (interpose " " values)))]
+    (println (str "\n" target-name " " joined-vals))))
+
+
+;; colored output
+
+
+(try
+  (js/require "colors")
+  (catch js/Error e
+    (log :core "Couldn't require module 'colors'.\n Some colored strings may not display.\n"
+               "`npm install` or `npm install colors` to fix this.")))
 
 
 ;; pleasantries
@@ -90,12 +106,6 @@
           padding (round (/ (- width (count string)) 2))
           pad     (apply str (repeat padding " "))]
       (str pad string pad))) )
-
-
-(defn log [target & values]
-  (let [target-name (.-cyan (str "" (.substring (str target) 1) ""))
-        joined-vals (.trim (apply str (interpose " " values)))]
-    (println (str "\n" target-name " " joined-vals))))
 
 
 (defn run-repl

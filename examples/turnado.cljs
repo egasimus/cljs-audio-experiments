@@ -1,10 +1,10 @@
 (use-module "osc")
 (use-module "midi")
-(use-module "spawn")
+(use-module "execute")
 
 
 (defn spawn-dssi-vst [& args]
-  (let [child-process (apply spawn "jack-dssi-host" args)]
+  (let [child-process (apply execute "jack-dssi-host" args)]
     (.on (.-stdout child-process) "data"
       (fn [data] (log :vst-stdout data)))
     (.on (.-stderr child-process) "data"
@@ -13,7 +13,7 @@
 
 
 (defn spawn-dssi-vst-gui [vst-name osc-url]
-  (let [child-process (spawn "/usr/lib32/dssi/dssi-vst/dssi-vst_gui"
+  (let [child-process (execute "/usr/lib32/dssi/dssi-vst/dssi-vst_gui"
                              [osc-url "dssi-vst.so" vst-name vst-name])]
     (.on (.-stdout child-process) "data"
       (fn [data] (log :vst-gui-stdout data)))
@@ -43,5 +43,5 @@
             (reset! osc-url osc-url-))) ))) ))
 
 
-(vst "/home/epimetheus/vst/Swierk/"         "Swierk.dll")
-(vst "/home/epimetheus/wine32/drive_c/VST/" "Turnado.dll")
+(vst "/home/epimetheus/vst/Swierk/"  "Swierk.dll")
+(vst "/home/epimetheus/vst/Turnado/" "Turnado32.dll")
