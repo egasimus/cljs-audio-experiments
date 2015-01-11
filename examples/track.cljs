@@ -15,19 +15,42 @@
 
       (log :module "Spawning VST plugin" vst-name (str "(" vst-file ")"))
 
-      (let [arguments   ["-c" vst-name
-                         vst-path]
-            options     ["env" (extend-env "VST_PATH"  vst-dir
-                                           "DSSI_PATH" "/home/epimetheus/code/kunst")]
-            vst-process (atom (execute "vsthost" arguments options))]
+      (let [arguments ["-c" vst-name
+                       vst-path]
+            options   ["env" (extend-env "VST_PATH"  vst-dir
+                                         "DSSI_PATH" "/home/epimetheus/code/kunst")]
+            vst-info  (atom { :process (execute "vsthost" arguments options) })]
 
         ;(.on (.-stdout @vst-process) "data"
           ;(fn [data] (log :vst-stdout data)))
 
-        ;(.on (.-stderr @vst-process) "data"
-          ;(fn [data] (log :vst-stderr data)))
+        (add-watch vst-info nil
+          (fn [_ _ old-info new-info]
+            (println old-info new-info)))
 
-        vst-process))))
+        (.on (.-stderr (@vst-info :process)) "data"
+          (fn [data]
+            (log :vst-stderr data)
+            (let [data (str data)
+                  jcn  "JACK client name: "
+                  jip  "JACK input port: "
+                  jop  "JACK output port: "]
+
+              (when (= 0 (.indexOf (str data) jcn))
+                (swap! vst-info assoc :jack-name
+                  (.substr data (.-length jcn))))
+
+              (when (= 0 (.indexOf (str data) jip))
+                (swap! vst-info assoc :jack-inputs
+                  (conj (or (@vst-info :jack-inputs) []) (.substr data (.-length jip)))))
+
+              (when (= 0 (.indexOf (str data) jop))
+                (swap! vst-info assoc :jack-outputs
+                  (conj (or (@vst-info :jack-outputs) []) (.substr data (.-length jop)))))
+
+            )))
+
+        vst-info))))
 
 
 (def *session* {
@@ -48,7 +71,7 @@
                  :path "/home/epimetheus/vst/Swierk/Swierk.dll"
                  :name "Swierk" }
                { :type :vst
-                 :path "/home/epimetheus/vst/Turnado/Turnado.dll"
+                 :path "/home/epimetheus/vst/Turnado/Turnado32.dll"
                  :name "Turnado" } ] } ]
 
   :author "Mlad Konstruktor" } )
