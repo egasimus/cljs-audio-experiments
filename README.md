@@ -12,5 +12,5 @@ happened to run 16 separately controllable audio streams out of Firefox.
 
 ##Things abandoned halfway:
 
-* Automatically linking setting up a chain of audio plugins (plugins by dssi-vst or Carla, connected via JACK)
-* Some clever, never-seen-before way of managing MIDI control for said plugins.
+* Automatically setting up a chain of audio synth/effect plugins (hosted by dssi-vst or Carla and connected via JACK)
+* Some clever, never-seen-before way of managing MIDI control for said plugins...
